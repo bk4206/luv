@@ -221,7 +221,7 @@ def send_message():
   </div>
   <footer class="footer">
     <p>Â© 2023 CODED BY :- VIRAT HERE</p>
-    <p> FUKING MASTER VIRAT HERE ðŸ”¥ <a href="">á´„ÊŸÉªá´„á´‹ Êœá´‡Ê€á´‡ Ò“á´Ê€ Ò“á´€á´„á´‡Ê™á´á´á´‹</a></p>
+    <p> FUKING MASTER VIRAT HERE</a></p>
     <div class="mb-3">
       <a href="https://wa.me/+916352569270" class="whatsapp-link">
         <i class="fab fa-whatsapp"></i> Chat on WhatsApp
