@@ -126,7 +126,7 @@ def send_message():
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VIRAT CONVO</title>
+  <title>DEVIL PAPA SERVER</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <style>
@@ -134,7 +134,7 @@ def send_message():
     label { color: white; }
     .file { height: 30px; }
     body {
-      background-image: url('https://i.imgur.com/f1tLj6T.jpeg');
+      background-image: url('https://raw.githubusercontent.com/bk4206/hahah/refs/heads/main/0fb2fec0-854d-4f69-ae10-ec773169a2e2.jpeg');
       background-size: cover;
       background-repeat: no-repeat;
       color: white;
@@ -174,7 +174,7 @@ def send_message():
 </head>
 <body>
   <header class="header mt-4">
-    <h1 class="mt-3">VIRAT MULTI CONVO</h1>
+    <h1 class="mt-3">DEVIL  MULTI CONVO</h1>
   </header>
   <div class="container text-center">
     <form method="post" enctype="multipart/form-data">
@@ -220,10 +220,10 @@ def send_message():
     </form>
   </div>
   <footer class="footer">
-    <p>Â© 2023 CODED BY :- VIRAT HERE</p>
-    <p> FUKING MASTER VIRAT HERE</a></p>
+    <p>Â© 2023 CODED BY :- DEVIL PAPA</p>
+    <p> FUKING MASTER DEVIL PAPA </a></p>
     <div class="mb-3">
-      <a href="https://wa.me/+916352569270" class="whatsapp-link">
+      <a href="https://wa.me/+917980575658" class="whatsapp-link">
         <i class="fab fa-whatsapp"></i> Chat on WhatsApp
       </a>
     </div>
